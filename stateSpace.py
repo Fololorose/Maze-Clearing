@@ -9,50 +9,72 @@
 #                        .
 #   }
 
-#dummy class node
+from math import floor
+
 class Node:
-    def __init__(self,y, x, rubbish):
-        self.x = x 
-        self.y = y
-        self.rubbish = rubbish # 0/1
+    def __init__(self, q, r, s, bin_size = 0, bin_weight = 0, rubbish_weight= 0, rubbish_size = 0, disposal_room=0, parent=None, action=None):
+        self.cube = (q, r, s) #cube coordinate
+        self.bin_size = bin_size #0-5 
+        self.bin_weight = bin_weight #0-40
+        self.rubbish_weight =  rubbish_weight #0/5/10/20/30
+        self.rubbish_size = rubbish_size #1/2/3
+        self.disposal_room = disposal_room #True/False 
+        self.parent = parent
+        self.action = action
         self.neighbours = []
 
     def add_neighbour(self, neighbour):
         self.neighbours.append(neighbour)
-      
+ 
+#add two vectors together (will change to use numpy arrays so no need this function)
+def vectorAdd(cube1, cube2):
+    new_cube = (cube1[0] + cube2[0], cube1[1] + cube2[1], cube1[2] + cube2[2])
+    return new_cube
+
 #transition model 
 def transitionModel(node, action):
     #initialise node 
-    child = Node(0, 2, 0)
+    child = Node(0, 0, 0, 0)
     #fill in node with other parameters
     #key in coordinates
     if action == "N":
-        child.x =  node.x - 2
-        child.y = (node.y)
+        child.cube = vectorAdd(node.cube, get_cube_direction_vector("N"))
     elif action == "S":
-        child.x = node.x + 2
-        child.y = (node.y) 
+        child.cube = vectorAdd(node.cube, get_cube_direction_vector("S"))
     elif action == "NE":
-        child.x = (node.x) + 1
-        child.y = (node.y) - 1
+        child.cube = vectorAdd(node.cube, get_cube_direction_vector("NE"))
     elif action == "SE":
-        child.x = (node.x) + 1
-        child.y = (node.y) + 1
-    elif action == "SW":
-        child.x = (node.x) - 1
-        child.y = (node.y) + 1
+        child.cube = vectorAdd(node.cube, get_cube_direction_vector("SE"))
     elif action == "NW":
-        child.x = (node.x) - 1
-        child.y = (node.y) - 1
-    elif action == "clean":
-        child.rubbish = 0
+        child.cube = vectorAdd(node.cube, get_cube_direction_vector("NW"))
+    elif action == "SW":
+        child.cube = vectorAdd(node.cube, get_cube_direction_vector("SW"))
     return child
 
-#state space: edit node attributes
+#get calculations given direction
+def get_cube_direction_vector(direction):
+    # (dq, dr, ds)
+    if direction == "N":
+        return (0, -1, +1)
+    elif direction == "S":
+        return (0, +1, -1)
+    elif direction == "NE":
+        return (+1, -1, 0)
+    elif direction == "SE":
+        return (+1, 0, -1)
+    elif direction == "SW":
+        return (-1, +1, 0)
+    elif direction == "NW":
+       return (-1, 0, +1)
+    # elif action == "clean":
+    #     child.rubbish = 0
+
+
+#creates entire state space
 def createStateSpace():
     #define size of the maze
     width = 9
-    height = 7
+    height = 6
 
     #list of possible actions
     actions = ['N', 'S', 'NE', 'SE', 'SW', 'NW']
@@ -60,34 +82,56 @@ def createStateSpace():
     #create a dict to save the state space and transitions using axial coordinates as keys
     state_space = {}
 
-    # put the range correctly :)
-    for y in range(height):
-        for x in range(width):
-            if x % 2 == 0:
-                if y % 2 == 0:
-                    node = Node(y, x, 0)
-                    state_space[(y, x)] = node
-                    for action in actions:
-                        neighbour = transitionModel(node, action)
-                        if(-1 <neighbour.x <= width and -1 < neighbour.y <= height):
-                            node.add_neighbour(neighbour) 
-            else:
-                if y % 2 != 0:
-                    if x % 2 != 0:
-                        node = Node(y, x, 0)
-                        state_space[(y, x)] = node
-                        for action in actions:
-                            neighbour = transitionModel(node, action)
-                            if(-1 <neighbour.x <= width and -1 < neighbour.y <= height):
-                                node.add_neighbour(neighbour) 
-                        
-    #print out the state space
-    for key in state_space:
-        print(key, '->', state_space[key])
-        # for neighbour in state_space[key].neighbours: 
-        #     print("neighbour: " + str(neighbour.y) + "," + str(neighbour.x))
-
+    #formula to create the maze coordinates
+    for q in range(0, width):
+        q_offset = floor((q+1)/2)
+        for r in range(0 - q_offset, height - q_offset):
+            s = -q-r
+            node = Node(q,r,s,0)
+            state_space[(q,r,s)] = node
     
+    #add neighbours to each node
+    for key in state_space:
+        for action in actions:
+            neighbour = transitionModel(state_space[key], action)
+            if neighbour.cube in state_space.keys():
+                state_space[key].add_neighbour(neighbour)  
+    
+    #determine disposal rooms, rubbish size and weight of each rooms
+    disposal_rooms = [(2, 4, -6), (5, -3, -2), (8, 1, -9)]
+    for i in disposal_rooms:
+        state_space[i].disposal_room = True
+        print(state_space[i].disposal_room)
+    state_space[(0, 5, -5)].rubbish_weight = 10
+    state_space[(0, 5, -5)].size = 1
+    state_space[(1, 2, -3)].rubbish_weight = 30
+    state_space[(1, 2, -3)].size = 3
+    state_space[(2, 1, -3)].rubbish_weight = 5
+    state_space[(2, 1, -3)].size = 1
+    state_space[(3, -1, -2)].rubbish_weight = 5
+    state_space[(3, -1, -2)].size = 1
+    state_space[(3, 2, -5)].rubbish_weight = 5
+    state_space[(3, 2, -5)].size = 3
+    state_space[(4, 0, -4)].rubbish_weight = 10
+    state_space[(4, 0, -4)].size = 2
+    state_space[(4, 2, -6)].rubbish_weight = 20
+    state_space[(4, 2, -6)].size = 1
+    state_space[(6, -2, -4)].rubbish_weight = 10
+    state_space[(6, -2, -4)].size = 2
+    state_space[(6, 1, -7)].rubbish_weight = 5
+    state_space[(6, 1, -7)].size = 2
+    state_space[(7, -4, -3)].rubbish_weight = 30
+    state_space[(7, -4, -3)].size = 1
+    state_space[(7, -1, -6)].rubbish_weight = 20
+    state_space[(7, -1, -6)].size = 2
+    state_space[(8, -3, -5)].rubbish_weight = 10
+    state_space[(8, -3, -5)].size = 3
+    
+    #print out the state space
+    # for key in state_space:
+    #     print("node: " + str(state_space[key].cube))
+    #     for neighbour in state_space[key].neighbours: 
+    #        print("neighbour: " + str(neighbour.cube))
 
+#run
 createStateSpace()
-

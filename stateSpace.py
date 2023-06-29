@@ -1,3 +1,14 @@
+#the state space created is a dictionary with coordinates as keys and the node object as the value
+#=================a visual representation====================
+#   state_space = {
+#   (0, 0) -> <__main__.Node object at 0x10f6243d0>
+#   (0, 2) -> <__main__.Node object at 0x10f624490>
+#   (0, 4) -> <__main__.Node object at 0x10f624580>
+#                        .
+#                        .
+#                        .
+#   }
+
 #dummy class node
 class Node:
     def __init__(self,y, x, rubbish):

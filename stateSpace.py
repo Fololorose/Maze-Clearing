@@ -26,7 +26,7 @@ class Node:
     def add_neighbour(self, neighbour):
         self.neighbours.append(neighbour)
  
-#add two vectors together (will change to use numpy arrays so no need this function)
+#add two vectors together
 def vectorAdd(cube1, cube2):
     new_cube = (cube1[0] + cube2[0], cube1[1] + cube2[1], cube1[2] + cube2[2])
     return new_cube

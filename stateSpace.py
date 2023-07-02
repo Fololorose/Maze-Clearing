@@ -69,7 +69,6 @@ def get_cube_direction_vector(direction):
     # elif action == "clean":
     #     child.rubbish = 0
 
-
 #creates entire state space
 def createStateSpace():
     #define size of the maze
@@ -87,7 +86,7 @@ def createStateSpace():
         q_offset = floor((q+1)/2)
         for r in range(0 - q_offset, height - q_offset):
             s = -q-r
-            node = Node(q,r,s,0)
+            node = Node(q,r,s)
             state_space[(q,r,s)] = node
     
     #add neighbours to each node
@@ -99,39 +98,35 @@ def createStateSpace():
     
     #determine disposal rooms, rubbish size and weight of each rooms
     disposal_rooms = [(2, 4, -6), (5, -3, -2), (8, 1, -9)]
-    for i in disposal_rooms:
-        state_space[i].disposal_room = True
-        print(state_space[i].disposal_room)
-    state_space[(0, 5, -5)].rubbish_weight = 10
-    state_space[(0, 5, -5)].size = 1
-    state_space[(1, 2, -3)].rubbish_weight = 30
-    state_space[(1, 2, -3)].size = 3
-    state_space[(2, 1, -3)].rubbish_weight = 5
-    state_space[(2, 1, -3)].size = 1
-    state_space[(3, -1, -2)].rubbish_weight = 5
-    state_space[(3, -1, -2)].size = 1
-    state_space[(3, 2, -5)].rubbish_weight = 5
-    state_space[(3, 2, -5)].size = 3
-    state_space[(4, 0, -4)].rubbish_weight = 10
-    state_space[(4, 0, -4)].size = 2
-    state_space[(4, 2, -6)].rubbish_weight = 20
-    state_space[(4, 2, -6)].size = 1
-    state_space[(6, -2, -4)].rubbish_weight = 10
-    state_space[(6, -2, -4)].size = 2
-    state_space[(6, 1, -7)].rubbish_weight = 5
-    state_space[(6, 1, -7)].size = 2
-    state_space[(7, -4, -3)].rubbish_weight = 30
-    state_space[(7, -4, -3)].size = 1
-    state_space[(7, -1, -6)].rubbish_weight = 20
-    state_space[(7, -1, -6)].size = 2
-    state_space[(8, -3, -5)].rubbish_weight = 10
-    state_space[(8, -3, -5)].size = 3
-    
+    room_assignments = [ #(room coordinates, weight, size)
+        ((0, 5, -5), 10, 1),
+        ((1, 2, -3), 30, 3),
+        ((2, 1, -3), 5, 1),
+        ((3, -1, -2), 5, 1),
+        ((3, 2, -5), 5, 3),
+        ((4, 0, -4), 10, 2),
+        ((4, 2, -6), 20, 1),
+        ((6, -2, -4), 10, 2),
+        ((6, 1, -7), 5, 2),
+        ((7, -4, -3), 30, 1),
+        ((7, -1, -6), 20, 2),
+        ((8, -3, -5), 10, 3)
+    ]
+    for room in disposal_rooms:
+        state_space[room].disposal_room = True
+        print(state_space[room].disposal_room)
+        
+    for room_coord, weight, size in room_assignments:
+        state_space[room_coord].rubbish_weight = weight
+        state_space[room_coord].size = size
+
     #print out the state space
-    # for key in state_space:
-    #     print("node: " + str(state_space[key].cube))
-    #     for neighbour in state_space[key].neighbours: 
-    #        print("neighbour: " + str(neighbour.cube))
+    for key in state_space:
+        print("node: " + str(state_space[key].cube))
+        for neighbour in state_space[key].neighbours: 
+           print("neighbour: " + str(neighbour.cube))
 
 #run
 createStateSpace()
+
+

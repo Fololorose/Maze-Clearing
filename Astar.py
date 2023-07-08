@@ -1,6 +1,6 @@
 from queue import PriorityQueue
 
-def Astar(initial_node):
+def a_star(initial_node):
   frontier = PriorityQueue()
   # Create a dictionary to store the cost from the start to each node
   g_score = {initial_node: 0}

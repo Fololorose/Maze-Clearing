@@ -43,6 +43,11 @@ def achieve_goal(current_node):
   else:
     return False
 
+# def check_final_condition(child, current_bin_size, current_bin_weight):
+#   if len(rooms_with_rubbish) == 0:
+#     heuristic = closest_target_room(child, disposal_rooms, current_bin_size, current_bin_weight)
+#   return heuristic
+
 # Determine possible child nodes to become frontier
 def expand_and_return_children(state_space, node, directions, current_bin_size, current_bin_weight):
   children = []
@@ -59,25 +64,32 @@ def closest_target_room(child, target_rooms, current_bin_size, current_bin_weigh
   direct_distance = []
   temp_child_coordinate = child.coordinate + (z_coordinate(child.coordinate[0], child.coordinate[1]),)
   for target_room in target_rooms:
-    if ((current_bin_size + target_room.rubbish_size) <= max_bin_size) and ((current_bin_weight + target_room.rubbish_weight) <= max_bin_weight): 
-      coordinates_substract = []
+    if ((current_bin_size + target_room.rubbish_size) <= max_bin_size) and ((current_bin_weight + target_room.rubbish_weight) <= max_bin_weight):
+      coordinates_subtract = []
       temp_target_room_coordinate = target_room.coordinate + (z_coordinate(target_room.coordinate[0], target_room.coordinate[1]),)
       for i in range(0, 3):
-        coordinates_substract.append(abs(temp_child_coordinate[i] - temp_target_room_coordinate[i]))
-      direct_distance.append(max(coordinates_substract))
+        coordinates_subtract.append(abs(temp_child_coordinate[i] - temp_target_room_coordinate[i]))
+      direct_distance.append(max(coordinates_subtract))
     else:
       # If the bin size or bin weight exceeds the maximum, set direct_distance to a large value to discourage selecting this target
       direct_distance.append(float("inf"))
   return min(direct_distance)
+
 
 # Heuristics euclidean distance
 def heuristics(state_space, child, current_bin_size, current_bin_weight):
   # Retrieve the nodes with disposal room and the nodes with rubbish
   disposal_rooms = [node for node in state_space.values() if node.disposal_room]
   rooms_with_rubbish = [node for node in state_space.values() if node.rubbish_size != 0 or node.rubbish_weight != 0]
-  # Probably gonna implement weightage
-  heuristic1 = closest_target_room(child, rooms_with_rubbish, current_bin_size, current_bin_weight)
-  heuristic2 = closest_target_room(child, disposal_rooms, current_bin_size, current_bin_weight)
+  if len(rooms_with_rubbish) == 0:
+    heuristic1 = float("inf")
+    heuristic2 = closest_target_room(child, disposal_rooms, current_bin_size, current_bin_weight)
+  elif current_bin_size == 0:  
+    heuristic1 = closest_target_room(child, rooms_with_rubbish, current_bin_size, current_bin_weight)
+    heuristic2 = float("inf")
+  else:
+    heuristic1 = closest_target_room(child, rooms_with_rubbish, current_bin_size, current_bin_weight)
+    heuristic2 = closest_target_room(child, disposal_rooms, current_bin_size, current_bin_weight)
   return min(heuristic1, heuristic2)
 
 
@@ -146,6 +158,7 @@ def greedy(state_space, rooms_with_rubbish, disposal_rooms, initial_node):
     # Goal test at expansion
     if achieve_goal(current_node):
       goal_achieved = True
+      solution.append(current_node.coordinate)
       break
     
     # Expand the first in the frontier
@@ -162,8 +175,8 @@ def greedy(state_space, rooms_with_rubbish, disposal_rooms, initial_node):
     # Add children to the frontier
     for child in children:
       # Check if a node was expanded or generated previously      
-      if not(child.coordinate in [e.coordinate for e in explored]):
-        frontier = append_and_sort(frontier, child)
+    #   if not(child.coordinate in [e.coordinate for e in explored]):
+      frontier = append_and_sort(frontier, child)
         
     print("Explored:", [e.coordinate for e in explored])
     print("Frontier:", [(f.coordinate, f.h_score) for f in frontier])
@@ -209,8 +222,5 @@ if __name__ == "__main__":
     
   solution = greedy(state_space, rooms_with_rubbish, disposal_rooms, initial_node)
   print("Solution:", solution)
-#   greedy(state_space, rooms_with_rubbish, disposal_rooms, initial_node)
-#   print("Path Cost:", cost)
-    
-    
+  print("Path Cost:", len(solution))
     

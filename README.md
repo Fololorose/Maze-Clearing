@@ -38,12 +38,16 @@ The greedy algorithm follows these steps:
 
 1. Initialize the maze and agent's starting position.
 2. While there is rubbish in any room:
+
    a. Collect rubbish from the current room and update the bin capacity.
+
    b. Expand the current node and generate children nodes.
+
    c. Calculate heuristic scores for the children nodes based on the distance to the closest room with rubbish and disposal room.
+
    d. Choose the child node with the minimum heuristic score and move to that room.
-3. If the current node is a disposal room and the bin is not empty, empty the bin.
-4. Repeat steps 2 and 3 until all rubbish is collected and the agent reaches the disposal room.
+4. If the current node is a disposal room and the bin is not empty, empty the bin.
+5. Repeat steps 2 and 3 until all rubbish is collected and the agent reaches the disposal room.
 
 How to Run
 1. Make sure you have Python and the required dependencies installed.

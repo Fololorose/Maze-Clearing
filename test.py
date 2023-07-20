@@ -134,7 +134,7 @@ def greedy(state_space, rooms_with_rubbish, disposal_rooms, initial_node):
     
   # Add initial node to frontier
   frontier.append(Node(initial_node[0], initial_node[1]))
-  
+
   current_step = 0
   while not goal_achieved:
     current_node = state_space[frontier[0].coordinate]
@@ -175,36 +175,36 @@ def greedy(state_space, rooms_with_rubbish, disposal_rooms, initial_node):
     #print(*solution)
     # Add children to the frontier
 
-
     for child in children:
       # Check if a node was expanded or generated previously      
     #   if not(child.coordinate in [e.coordinate for e in explored]):
       frontier = append_and_sort(frontier, child)
-    #goal_state.h_score = heuristics(state_space, current_node, current_bin_size, current_bin_weight)   
 
-    print("Current Coordinate:", current_node.coordinate)
-    print("Current Bin Size:", current_bin_size)
-    print("Current Bin Weight:", current_bin_weight)
-    print("Rooms with Rubbish Left:", len(rooms_with_rubbish))
+    print("=" * 25, "Step:",current_step, "=" * 25)  
+    print("\nCurrent position:", current_node.coordinate, "| Bin State:[",current_bin_size,"m³, ",current_bin_weight,"kg ]"  )
     remaining_rubbish_coordinates = [room[0] for room in rooms_with_rubbish]
-    print("Coordinates of Rooms with Rubbish Left:", remaining_rubbish_coordinates)
-    print("Solution Path So Far:", solution)
+    print("Rooms with Rubbish Left:", len(rooms_with_rubbish), "| Coordinates:", remaining_rubbish_coordinates)
+    if current_node.coordinate in disposal_rooms:
+        print("Bin moved to the disposal room.")
+    elif current_node.rubbish_size or current_node.rubbish_weight:
+        print("Bin collected rubbish in the room.")
+    else:
+        print("Bin moved to an empty room.")
     print("")
-
-    print("Explored:", [e.coordinate for e in explored])
-    print("Frontier:", [(f.coordinate, f.h_score) for f in frontier])
-    print("Children:", [c.coordinate for c in children])
+    print("-" * 50)  
+    print("\nExplored: ", [e.coordinate for e in explored])
+    print("Frontier: ", [(f.coordinate, f.h_score) for f in frontier])
+    print("Children: ", [c.coordinate for c in children])
     print("")
-    
-
+    print("-" * 50)  
+    print("\nSolution Path So Far: ", solution)
+    print("")
 
     next_expanded_node = frontier.pop(0)
     frontier.clear()
     frontier.append(next_expanded_node)
 
 
-
-    
     current_step += 1
   return solution
 
@@ -240,6 +240,6 @@ if __name__ == "__main__":
   initial_node = (0, 0)
     
   solution = greedy(state_space, rooms_with_rubbish, disposal_rooms, initial_node)
-  print("Solution:", solution)
+  print("=" * 50, "\nSolution:", solution)
   print("Path Cost:", len(solution))
     
